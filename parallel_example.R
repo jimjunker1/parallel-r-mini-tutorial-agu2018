@@ -46,8 +46,9 @@ stopCluster(parallel_cluster)
 #### Mac and Windows differences: for Macs you can use "FORK", meaning that the environment also gets copied
 # to another node, so it'll recognize objects defined *before* the parallelization. This is not the case for
 # Windows. E.g. this works on a Mac but not on Windows:
-parallel_cluster<-makeCluster(num_cores, type="FORK")
 base <- 2
+parallel_cluster <- makeCluster(num_cores, type="FORK") # This has to come *after* defining the objects in your environment
+# (such as "base")
 parLapply(parallel_cluster, 
           2:4, 
           function(exponent) 
@@ -70,8 +71,6 @@ stopCluster(parallel_cluster)
 # Use the package doParallel. Has MPI in the background. Sends each loop to a different core. See:
 # https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf
 
-library(unmarked) # Package to develop occupancy models
-library(tidyverse) # Data organization and manipulation
 library(doParallel) # To parallelize runs (locations)
 
 # An example without parallelization: bootstrapping!
@@ -81,6 +80,7 @@ wq_data <- read.csv("new_jx_wq.csv")
 # We'll use a GLM to model dissolved oxygen from temperature
 # Temperature is in column 2 and Dissolved O2 in column 6
 
+# First do a regular loop first to see how long it takes
 # set number of bootstraps
 trials <- 20000
 # Start timer
@@ -95,6 +95,7 @@ for(i in 1:trials){
 # get final time
 Sys.time() - init
 # 17.95 secs on my computer
+
 
 ############### Now do it parallel
 num_cores <- detectCores()
